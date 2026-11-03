@@ -1,6 +1,6 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 50).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 51).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry (works offline)" saves on the device.
