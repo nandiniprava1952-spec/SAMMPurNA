@@ -1,13 +1,19 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 72).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 74).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 72
+## What's new in Rev 74
+- HBNC "＋ New Entry": new **Availability** field under *Child & mother* (Available / Not available / Migrated / Died / Refused).
+
+### Rev 73
+- HBNC "＋ New Entry": new **Discharged from newborn care facility (SNCU/ NBSU/NICU)** (Yes/No) field under *Birth details*. It feeds the SNCU Discharged KPI card and is saved to the cloud with the entry.
+
+### Rev 72
 - Removed the "＋ New Entry" and "Offline Records" tabs from the top bar of ANC and HBNC (the buttons on the upload card are unchanged).
 
 ### Rev 71
