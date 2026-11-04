@@ -1,13 +1,16 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 74).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 75).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 74
+## What's new in Rev 75
+- "＋ New Entry" (ANC and HBNC): dropdown choices (District, Block, Visit number, etc.) now always show readable text on the dark list, on phones/browsers that open a white native dropdown.
+
+### Rev 74
 - HBNC "＋ New Entry": new **Availability** field under *Child & mother* (Available / Not available / Migrated / Died / Refused).
 
 ### Rev 73
