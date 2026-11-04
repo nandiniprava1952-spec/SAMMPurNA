@@ -1,13 +1,17 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 76).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 77).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 76
+## What's new in Rev 77
+- HBNC tab renamed **Load New CSV / Excel**.
+- After a CSV / Excel file is loaded in ANC or HBNC, its records are **saved to the cloud automatically** (merged with existing records) and the dashboard **refreshes with the updated records**. Needs a cloud login and internet; if not available yet, it waits and retries (every minute, when back online, after login).
+
+### Rev 76
 - Removed the "Send WhatsApp (BDM)" button and the BDM number box from Offline Records (ANC and HBNC). CSV / Excel export and Delete all are unchanged.
 
 ### Rev 75
