@@ -1,13 +1,19 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 82).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 84).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 82
+## What's new in Rev 84
+- HBNC: new KPI cards **Newborn / Child Deaths** and **Mother Deaths** (visits with a death reported) under Dashboard, District Review and Records. Click a card to list those visits. Not shown on Home.
+
+### Rev 83
+- HBNC Home: removed the "Fast Breathing (>60/min)" and "No Spontaneous Movement / Lethargy" cards; "Preterm / Low Birth Weight" is now two cards, **Preterm Births** and **Low Birth Weight** (each clickable to list its visits).
+
+### Rev 82
 - HBNC **Visits by Designation**: the worker's designation is now read from `user_designation` (code or label text) or any other column containing "designation". Visits with a blank designation take the designation the same worker (name + district + block) has in their other visits when it clearly dominates (60%+). Only visits with no usable information stay in "Not recorded".
 
 ### Rev 81
