@@ -1,13 +1,16 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 79).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 80).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 79
+## What's new in Rev 80
+- Auto-save after **Load New CSV / Excel** made more reliable: it now waits for any cloud save/load already running (instead of failing), retries 6 times over about 5 minutes, and shows the real reason if it still cannot save. Offline-entry auto-save uses the same safe wait.
+
+### Rev 79
 - WhatsApp summary (ANC and HBNC offline entries) now has an **Address** line (village name, facility name) right below the visit date.
 
 ### Rev 78

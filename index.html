@@ -718,7 +718,9 @@ body{height:100vh;height:100dvh;}
   let CLOUD_AUTH = null; // {district:'350'|'ADMIN', pass:'...'}
   const cloudBusy = {};
   const MOD_LABEL = { hbnc: 'HBNC / HBYC / PNC', anc: 'ANC Home Visit' };
+  let lastCloudErr = '';
   function cloudStatus(msg, isErr){
+    if(isErr) lastCloudErr = String(msg || '');
     const el = document.getElementById('cloudStatus');
     if(el){ el.textContent = msg; el.style.color = isErr ? '#f87171' : '#c9a58c'; }
   }
@@ -975,6 +977,17 @@ body{height:100vh;height:100dvh;}
   // the phone is online and a district / block / State login is active: right away, when the phone
   // comes back online, when the app is opened again or brought to the front, and by a retry every minute.
   // The entries stay safe on the phone either way; failures are simply retried later.
+  // Runs cloudSave for the auto-savers: waits (up to 3 minutes) for any save / load already running on that
+  // dashboard instead of giving up, and remembers the reason when it fails.
+  async function cloudSaveWait(key, opts){
+    const t0 = Date.now();
+    while(cloudBusy[key] && Date.now() - t0 < 180000){ await new Promise(function(r){ setTimeout(r, 1500); }); }
+    lastCloudErr = '';
+    let ok = false;
+    try{ ok = await cloudSave(key, opts); }catch(e){ ok = false; lastCloudErr = String(e && e.message || e); }
+    if(!ok && !lastCloudErr) lastCloudErr = 'the cloud did not confirm the save';
+    return ok === true;
+  }
   const OE_PEND = 'sm_oe_pending_', OE_DONE = 'sm_oe_synced_';
   let oeRunning = false;
   function oeGet(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
@@ -1007,7 +1020,7 @@ body{height:100vh;height:100dvh;}
         const sig = oeGet(OE_PEND + key);
         cloudStatus('Auto-saving offline entries (' + MOD_LABEL[key] + ') to the cloud...');
         let ok = false;
-        try{ ok = await cloudSave(key, { onlyOffline: true }); }catch(e){ ok = false; }
+        ok = await cloudSaveWait(key, { onlyOffline: true });
         if(ok){
           oeSet(OE_DONE + key, sig);
           if(oeGet(OE_PEND + key) === sig) oeSet(OE_PEND + key, '');   // unchanged while uploading
@@ -1029,16 +1042,24 @@ body{height:100vh;height:100dvh;}
   // (merged with what is already there) and the dashboard is then refreshed from the cloud, so the
   // updated records appear without any button. If the phone is offline or nobody is logged in yet,
   // it waits and tries again (every minute, when back online, after login).
-  const fileSync = { anc: { pending: false, tries: 0 }, hbnc: { pending: false, tries: 0 } };
+  const fileSync = { anc: { pending: false, tries: 0, timer: null }, hbnc: { pending: false, tries: 0, timer: null } };
+  const FILE_DELAYS = [800, 6000, 20000, 45000, 90000, 150000];     // retry schedule (ms) - 6 tries in about 5 minutes
   let fileRunning = false; const fileHintShown = {};
   window.addEventListener('message', function(ev){
     const m = ev.data;
     if(!m || m.mchDashboard !== true || m.action !== 'file-loaded') return;
     const key = m.dashboard;
     if(!fileSync[key] || !frames[key] || frames[key].contentWindow !== ev.source) return;
-    fileSync[key].pending = true; fileSync[key].tries = 0; fileHintShown[key] = false;
-    setTimeout(fileAutoSync, 500);
+    const st = fileSync[key];
+    st.pending = true; st.tries = 0; fileHintShown[key] = false;
+    if(st.timer) clearTimeout(st.timer);
+    st.timer = setTimeout(fileAutoSync, FILE_DELAYS[0]);
   });
+  function fileRetryLater(key){
+    const st = fileSync[key];
+    if(st.timer) clearTimeout(st.timer);
+    st.timer = setTimeout(fileAutoSync, FILE_DELAYS[Math.min(st.tries, FILE_DELAYS.length - 1)]);
+  }
   async function fileAutoSync(){
     if(fileRunning) return;
     const keys = ['anc','hbnc'].filter(function(k){ return fileSync[k].pending; });
@@ -1048,23 +1069,33 @@ body{height:100vh;height:100dvh;}
       keys.forEach(function(k){ if(!fileHintShown[k]){ fileHintShown[k] = true; try{ cloudStatus('New ' + MOD_LABEL[k] + ' file loaded. It will be saved to the cloud automatically after you log in.'); }catch(e){} } });
       return;
     }
-    if(navigator.onLine === false) return;
+    if(navigator.onLine === false){ keys.forEach(function(k){ fileRetryLater(k); }); return; }
     fileRunning = true;
     try{
       for(const key of keys){
-        if(cloudBusy[key]) continue;
-        cloudStatus('Saving the newly loaded ' + MOD_LABEL[key] + ' records to the cloud...');
-        let ok = false;
-        try{ ok = await cloudSave(key, {}); }catch(e){ ok = false; }
+        const st = fileSync[key];
+        const w = frames[key] && frames[key].contentWindow;
+        if(!loaded[key] || !w || !w.__cloudGetRows){ st.tries++; fileRetryLater(key); continue; }   // dashboard still starting
+        cloudStatus('Saving the newly loaded ' + MOD_LABEL[key] + ' records to the cloud' + (st.tries ? ' (attempt ' + (st.tries + 1) + ')' : '') + '...');
+        const ok = await cloudSaveWait(key, {});
         if(ok){
-          fileSync[key].pending = false;
+          st.pending = false; st.tries = 0;
           delete warm[key];
           let reloaded = false;
           try{ reloaded = await cloudLoadModule(key, false); }catch(e){ reloaded = false; }
           cloudStatus('\u2601 New ' + MOD_LABEL[key] + ' records saved to the cloud' + (reloaded ? ' and the dashboard is updated with the latest records.' : '.'));
         } else {
-          fileSync[key].tries++;
-          if(fileSync[key].tries >= 4){ fileSync[key].pending = false; cloudStatus('Could not auto-save the new ' + MOD_LABEL[key] + ' file to the cloud. Please click \u201cSave records to cloud\u201d.', true); }
+          st.tries++;
+          const reason = lastCloudErr;
+          // reasons that retrying cannot fix
+          const fatal = /No records loaded|recognisable district|No records for your block/i.test(reason);
+          if(fatal || st.tries >= FILE_DELAYS.length){
+            st.pending = false;
+            cloudStatus('Could not auto-save the new ' + MOD_LABEL[key] + ' file to the cloud (' + (reason || 'unknown reason') + '). Click \u201cSave records to cloud\u201d to try again.', true);
+          } else {
+            cloudStatus('Cloud save did not complete (' + (reason || 'unknown reason') + '). Retrying automatically...', true);
+            fileRetryLater(key);
+          }
         }
       }
     } finally { fileRunning = false; }
