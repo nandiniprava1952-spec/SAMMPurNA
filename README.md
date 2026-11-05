@@ -1,13 +1,19 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 80).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 82).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 80
+## What's new in Rev 82
+- HBNC **Visits by Designation**: the worker's designation is now read from `user_designation` (code or label text) or any other column containing "designation". Visits with a blank designation take the designation the same worker (name + district + block) has in their other visits when it clearly dominates (60%+). Only visits with no usable information stay in "Not recorded".
+
+### Rev 81
+- **Cloud repair:** if saved cloud data for a block/district is damaged ("Skipped: saved data incomplete or damaged"), saving no longer refuses. Load a file that contains those records (Load New CSV / Excel saves automatically, or click Save records to cloud) and the damaged copy is rebuilt from it. Network/server hiccups are still only retried, never overwritten.
+
+### Rev 80
 - Auto-save after **Load New CSV / Excel** made more reliable: it now waits for any cloud save/load already running (instead of failing), retries 6 times over about 5 minutes, and shows the real reason if it still cannot save. Offline-entry auto-save uses the same safe wait.
 
 ### Rev 79
