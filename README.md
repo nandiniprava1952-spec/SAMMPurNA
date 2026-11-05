@@ -1,13 +1,16 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 86).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 87).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 86
+## What's new in Rev 87
+- % KPI cards (HBNC and ANC) now show the **figure as the main number and the percentage in brackets**, e.g. **3 (12.5%)**.
+
+### Rev 86
 - % KPI cards (HBNC and ANC) now show the figure in brackets right next to the percentage, e.g. **12.5% (3)**; hover for "3 of 24 visits".
 
 ### Rev 85
