@@ -1,13 +1,16 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 88).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 89).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 88
+## What's new in Rev 89
+- HBNC: **Nursing Officer** added to the Designation choices ("＋ New Entry" and the Visits by Designation cards).
+
+### Rev 88
 - ANC "＋ New Entry": the **Home location (GPS)** section (latitude, longitude, accuracy, area; auto-captured, works offline) is now inside the form, like HBNC, and is saved with the entry and to the cloud.
 
 ### Rev 87
