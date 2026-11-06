@@ -1,6 +1,0 @@
-# never commit beneficiary / visit data exports
-*.csv
-*.xlsx
-*.xls
-*.json
-.DS_Store
