@@ -1054,6 +1054,11 @@ body{height:100vh;height:100dvh;}
   // it waits and tries again (every minute, when back online, after login).
   const fileSync = { anc: { pending: false, tries: 0, timer: null }, hbnc: { pending: false, tries: 0, timer: null } };
   const FILE_DELAYS = [800, 6000, 20000, 45000, 90000, 150000];     // retry schedule (ms) - 6 tries in about 5 minutes
+  // Memory guards: saving or re-reading tens of thousands of rows keeps several copies of them in memory at once, which can
+  // crash the browser tab ("Error code: Out of Memory"). Big files therefore skip the automatic steps and use the buttons.
+  const FILE_AUTO_MAX = 25000;     // records: above this the automatic cloud save is skipped
+  const FILE_RELOAD_MAX = 8000;    // records: above this the automatic refresh from the cloud is skipped
+  function heapRatio(){ try{ const pm = performance && performance.memory; return pm && pm.jsHeapSizeLimit ? pm.usedJSHeapSize / pm.jsHeapSizeLimit : 0; }catch(e){ return 0; } }
   let fileRunning = false; const fileHintShown = {};
   window.addEventListener('message', function(ev){
     const m = ev.data;
@@ -1061,7 +1066,7 @@ body{height:100vh;height:100dvh;}
     const key = m.dashboard;
     if(!fileSync[key] || !frames[key] || frames[key].contentWindow !== ev.source) return;
     const st = fileSync[key];
-    st.pending = true; st.tries = 0; fileHintShown[key] = false;
+    st.pending = true; st.tries = 0; st.count = Number(m.count) || 0; fileHintShown[key] = false;
     if(st.timer) clearTimeout(st.timer);
     st.timer = setTimeout(fileAutoSync, FILE_DELAYS[0]);
   });
@@ -1086,14 +1091,20 @@ body{height:100vh;height:100dvh;}
         const st = fileSync[key];
         const w = frames[key] && frames[key].contentWindow;
         if(!loaded[key] || !w || !w.__cloudGetRows){ st.tries++; fileRetryLater(key); continue; }   // dashboard still starting
+        if(st.count > FILE_AUTO_MAX || heapRatio() > 0.6){
+          st.pending = false;
+          cloudStatus('Loaded ' + st.count.toLocaleString() + ' ' + MOD_LABEL[key] + ' records. The file is large, so the automatic cloud save was skipped to keep the browser from running out of memory. Click \u201cSave records to cloud\u201d when you are ready (a computer works best).');
+          continue;
+        }
         cloudStatus('Saving the newly loaded ' + MOD_LABEL[key] + ' records to the cloud' + (st.tries ? ' (attempt ' + (st.tries + 1) + ')' : '') + '...');
         const ok = await cloudSaveWait(key, {});
         if(ok){
           st.pending = false; st.tries = 0;
           delete warm[key];
-          let reloaded = false;
-          try{ reloaded = await cloudLoadModule(key, false); }catch(e){ reloaded = false; }
-          cloudStatus('\u2601 New ' + MOD_LABEL[key] + ' records saved to the cloud' + (reloaded ? ' and the dashboard is updated with the latest records.' : '.'));
+          let reloaded = false, skippedReload = false;
+          if(st.count > FILE_RELOAD_MAX || heapRatio() > 0.45){ skippedReload = true; }
+          else { try{ reloaded = await cloudLoadModule(key, false); }catch(e){ reloaded = false; } }
+          cloudStatus('\u2601 New ' + MOD_LABEL[key] + ' records saved to the cloud' + (reloaded ? ' and the dashboard is updated with the latest records.' : (skippedReload ? '. Click \u201cLoad latest\u201d to see the combined records (skipped automatically to save memory).' : '.')));
         } else {
           st.tries++;
           const reason = lastCloudErr;
@@ -1389,7 +1400,7 @@ body{height:100vh;height:100dvh;}
     badge.style.display = 'flex';
     if(REC_URL) document.getElementById('cloudCtl').style.display = 'inline-flex';
     document.getElementById('lockName').textContent = DISTRICT_LOCK ? (DISTRICT_LOCK.blockName ? DISTRICT_LOCK.name + ' \u203a ' + DISTRICT_LOCK.blockName + ' block' : DISTRICT_LOCK.name + ' district') : 'All districts (State)';
-    document.getElementById('lockName').textContent += '  \u00b7  Rev 90';   // shows which build is running
+    document.getElementById('lockName').textContent += '  \u00b7  Rev 91';   // shows which build is running
     cloudPull();
     cloudWarm('hbnc');
     showTab('hbnc'); // keeps the highlighted tab, visible frame and loaded dashboard in sync
