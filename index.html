@@ -817,6 +817,14 @@ body{height:100vh;height:100dvh;}
     return 'j:' + ks.map(function(k){ return k + '=' + String(r[k]).trim(); }).join('\u0001');
   }
   // Older cloud records are kept; a record that matches an older one (same id) replaces it; new records are added.
+  // Same content, ignoring key order (much cheaper than comparing two JSON strings for every row).
+  function rowsEqual(a, b){
+    if(a === b) return true;
+    let na = 0, nb = 0;
+    for(const k in a){ const v = a[k]; if(v === undefined) continue; na++; if(v !== b[k]) return false; }
+    for(const k in b){ if(b[k] !== undefined) nb++; }
+    return na === nb;
+  }
   function mergeRows(oldRows, newRows){
     const idx = new Map(), out = [];
     oldRows.forEach(function(r){ const id = rowIdent(r), p = idx.get(id); if(p === undefined){ idx.set(id, out.length); out.push(r); } else out[p] = r; });
@@ -824,7 +832,7 @@ body{height:100vh;height:100dvh;}
     newRows.forEach(function(r){
       const id = rowIdent(r), p = idx.get(id);
       if(p === undefined){ idx.set(id, out.length); out.push(r); added++; changed.push(r); }
-      else { if(JSON.stringify(out[p]) !== JSON.stringify(r)){ updated++; changed.push(r); } out[p] = r; }
+      else { if(!rowsEqual(out[p], r)){ updated++; changed.push(r); } out[p] = r; }
     });
     return { rows: out, added: added, updated: updated, changed: changed };
   }
@@ -910,7 +918,16 @@ body{height:100vh;height:100dvh;}
       const repaired = [], stillBad = [];
       cloudStatus('Checking records already in the cloud...');
       const ms = ((await recCall('manifest', { module: key })).manifests) || [];
-      const keep = function(arr){ return got.keys ? arr.map(function(r){ const o = pickKeys(r, got.keys); if(r._uuid != null && o._uuid === undefined) o._uuid = r._uuid; return o; }) : arr; };
+      const keySet = got.keys ? new Set(got.keys) : null;
+      const keep = function(arr){
+        if(!keySet) return arr;
+        return arr.map(function(r){
+          let extra = false;
+          for(const k in r){ if(r[k] !== undefined && !keySet.has(k)){ extra = true; break; } }
+          if(!extra) return r;                                           // already only the known columns: no copy needed
+          const o = pickKeys(r, got.keys); if(r._uuid != null && o._uuid === undefined) o._uuid = r._uuid; return o;
+        });
+      };
       if(A.block){
         // Block login: save only this block's records.
         const arr = rows.filter(function(r){ return rowDistrictCode(r) === A.district && rowBlockKey(r, A.district) === A.block; });
@@ -940,8 +957,14 @@ body{height:100vh;height:100dvh;}
         if(!groups.size){ cloudStatus('No records with a recognisable district to save.', true); return; }
         let n = 0, abort = false;
         const gl = Array.from(groups.entries());
-        await poolRun(gl, 2, async function(ent){
+        await poolRun(gl, rows.length > 30000 ? 1 : 2, async function(ent){
           if(abort) return;
+          if(heapRatio() > 0.8){
+            abort = true;
+            cloudStatus('The browser is running low on memory, so the save was paused. Districts finished so far are saved. Reload the page, log in and click \u201cSave records to cloud\u201d again to continue (districts already up to date are skipped quickly).', true);
+            return;
+          }
+          await new Promise(function(r){ setTimeout(r, 30); });          // let the browser free memory between districts
           const d = ent[0], arr = ent[1], myn = ++n;
           cloudStatus('Merging ' + DISTRICT_ACCESS[d].name + ' with records already in the cloud (' + myn + '/' + groups.size + ')...');
           const ex = await loadDistrictEffective(key, ms, d);
@@ -1400,7 +1423,7 @@ body{height:100vh;height:100dvh;}
     badge.style.display = 'flex';
     if(REC_URL) document.getElementById('cloudCtl').style.display = 'inline-flex';
     document.getElementById('lockName').textContent = DISTRICT_LOCK ? (DISTRICT_LOCK.blockName ? DISTRICT_LOCK.name + ' \u203a ' + DISTRICT_LOCK.blockName + ' block' : DISTRICT_LOCK.name + ' district') : 'All districts (State)';
-    document.getElementById('lockName').textContent += '  \u00b7  Rev 91';   // shows which build is running
+    document.getElementById('lockName').textContent += '  \u00b7  Rev 92';   // shows which build is running
     cloudPull();
     cloudWarm('hbnc');
     showTab('hbnc'); // keeps the highlighted tab, visible frame and loaded dashboard in sync

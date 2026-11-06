@@ -1,13 +1,16 @@
 # SAMMPurNA – MNC Dashboards (ANC · HBNC/HBYC/PNC)
 
-Single-file, offline-capable dashboard for Odisha NHM (Rev 91).
+Single-file, offline-capable dashboard for Odisha NHM (Rev 92).
 
 - Live site: https://nandiniprava1952-spec.github.io/SAMMPurNA/
 - Works offline after first load; "＋ New Entry" saves on the device.
 - Form language: English / ଓଡ଼ିଆ / both (selector in the form).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
-## What's new in Rev 91
+## What's new in Rev 92
+- **Faster, lighter "Save records to cloud"** (State login especially): rows are compared without building two JSON strings each (about 4x faster), rows are no longer copied when they already have only the known columns, big uploads (over 30,000 records) save one district at a time with short pauses so the browser can free memory, and the save pauses with a clear message (instead of crashing) if memory runs very low. Districts already saved stay saved; run it again to continue.
+
+### Rev 91
 - **Out-of-memory guard** for *Load New CSV / Excel*: very large files (over 25,000 records) skip the automatic cloud save, and files over 8,000 records skip the automatic refresh from the cloud, so the browser tab doesn't crash. Use "Save records to cloud" / "Load latest" instead (a computer works best). For huge files prefer CSV over Excel, or split by district.
 
 ### Rev 90
