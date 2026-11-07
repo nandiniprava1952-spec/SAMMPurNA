@@ -1317,7 +1317,15 @@ body{height:100vh;height:100dvh;}
       if(silent && w0 && Date.now() - w0.t < 120000){ delete warm[key]; try{ j = await w0.manifest; }catch(e){ j = null; } }
       if(!j) j = await recCall('manifest', { module: key });
       const ms = j.manifests || [];
-      if(!ms.length){
+      // Facility login: this facility's earlier records (saved by a district / block / State login) are filtered out of the
+      // saved data ON THE SERVER, so no other facility's records are ever sent to this device.
+      let hist = [], histErr = '';
+      if(CLOUD_AUTH && CLOUD_AUTH.facility){
+        try{ cloudStatus('Loading earlier ' + MOD_LABEL[key] + ' records of your facility...'); const hj = await recCall('facview', { module: key }); hist = hj.rows || []; }
+        catch(fe){ histErr = String(fe && fe.message || fe); }
+      }
+      if(!ms.length && !hist.length){
+        if(histErr){ cloudStatus('Could not load the earlier records of your facility (' + histErr + '). Use Load New CSV / Excel for those.', true); return false; }
         const who = CLOUD_AUTH && CLOUD_AUTH.block ? 'your block' : MOD_LABEL[key];
         cloudStatus(silent ? 'No ' + who + ' records in the cloud yet - load a file, then Save.' : 'No cloud records for ' + who + ' yet.');
         return false;
@@ -1362,6 +1370,12 @@ body{height:100vh;height:100dvh;}
       const fMs = ms.filter(function(m){ return /^F\d/.test(String(m.scope)); });
       const isFacLogin = !!(CLOUD_AUTH && CLOUD_AUTH.facility);
       if(isFacLogin){ try{ const cur = (w.__cloudGetRows && w.__cloudGetRows().rows) || []; for(let q = 0; q < cur.length; q++) all.push(cur[q]); }catch(e){} }
+      if(isFacLogin && hist.length){
+        const seenH = new Set();
+        for(let q = 0; q < all.length; q++){ try{ seenH.add(rowIdent(all[q])); }catch(e){} }
+        for(let q = 0; q < hist.length; q++){ let id = null; try{ id = rowIdent(hist[q]); }catch(e){} if(id === null || !seenH.has(id)){ if(id !== null) seenH.add(id); all.push(hist[q]); } }
+      }
+      hist = null;
       if(fMs.length){
         const fidx = new Map();
         for(let q = 0; q < all.length; q++){ const u = all[q] && all[q]._uuid; if(u != null && String(u).indexOf('offline-') === 0) fidx.set(String(u), q); }
@@ -1385,7 +1399,7 @@ body{height:100vh;height:100dvh;}
         return true;
       }
       w.__cloudIngest(all, 'Cloud (saved ' + new Date(latest).toLocaleString() + ')'); ingested = true;
-      cloudStatus('Loaded ' + all.length.toLocaleString() + ' ' + MOD_LABEL[key] + ' records from cloud.');
+      cloudStatus('Loaded ' + all.length.toLocaleString() + ' ' + MOD_LABEL[key] + ' records from cloud.' + (histErr ? ' (Earlier records of your facility could not be loaded: ' + histErr + ')' : ''), !!histErr);
       return true;
     }catch(e){
       cloudStatus('Cloud load failed: ' + e.message, true);
@@ -1506,7 +1520,7 @@ body{height:100vh;height:100dvh;}
     badge.style.display = 'flex';
     if(REC_URL) document.getElementById('cloudCtl').style.display = 'inline-flex';
     document.getElementById('lockName').textContent = DISTRICT_LOCK ? (DISTRICT_LOCK.facilityName ? DISTRICT_LOCK.facilityName + ' facility' : DISTRICT_LOCK.blockName ? DISTRICT_LOCK.name + ' \u203a ' + DISTRICT_LOCK.blockName + ' block' : DISTRICT_LOCK.name + ' district') : 'All districts (State)';
-    document.getElementById('lockName').textContent += '  \u00b7  Rev 104';   // shows which build is running
+    document.getElementById('lockName').textContent += '  \u00b7  Rev 105';   // shows which build is running
     cloudPull();
     cloudWarm('hbnc');
     showTab('hbnc'); // keeps the highlighted tab, visible frame and loaded dashboard in sync
