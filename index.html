@@ -102,6 +102,9 @@
 #gate .err{color:#f87171;font-size:12.5px;min-height:16px;margin-bottom:8px;}
 #lockbadge{display:none;margin-left:auto;align-items:center;gap:8px;font-size:12px;color:#c9a58c;}
 #lockbadge b{color:#fb923c;} #lockbadge button{background:transparent;border:1px solid #2e2015;color:#c9a58c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;}
+#lockbadge #logoutBtn{background:#dc2626;border:1px solid #ef4444;color:#fff;font-weight:700;font-size:13px;padding:7px 16px;border-radius:8px;letter-spacing:.2px;box-shadow:0 2px 6px rgba(220,38,38,.45);}
+#lockbadge #logoutBtn:hover{background:#b91c1c;border-color:#f87171;}
+#lockbadge #logoutBtn:active{transform:translateY(1px);}
 </style>
 <style id="mobile-layer">
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
@@ -112,6 +115,7 @@ body{height:100vh;height:100dvh;}
   header h1{font-size:13.5px;flex:1 1 100%;margin-right:0;}
   #lockbadge{margin-left:0;width:100%;flex-wrap:wrap;gap:6px;}
   #lockbadge button{min-height:36px;padding:6px 10px;}
+  #lockbadge #logoutBtn{min-height:42px;padding:8px 18px;font-size:14px;margin-left:auto;}
   #main-dashboard-tabs{width:100%;margin-top:0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:6px;scrollbar-width:none;}
   #main-dashboard-tabs::-webkit-scrollbar{display:none;}
   .switcher button{flex:0 0 auto;white-space:nowrap;padding:10px 14px;min-height:42px;font-size:13px;}
@@ -134,7 +138,7 @@ body{height:100vh;height:100dvh;}
 <select id="gateDist"></select><select id="gateBlock" style="display:none"></select><select id="gateFacSel" style="display:none"></select><input id="gatePass" type="password" placeholder="Passcode" autocomplete="off"><button type="button" class="viewpw" id="gateView">View passcode</button><div class="err" id="gateErr"></div><button type="button" id="gateBtn">Open dashboard</button><p style="text-align:center;margin:10px 0 0"><a href="#" id="gateOffline" style="color:#fb923c;font-size:13px;text-decoration:underline">Use offline (no cloud) / ଅଫଲାଇନ୍ ବ୍ୟବହାର କରନ୍ତୁ (କ୍ଲାଉଡ୍ ବିନା)</a></p></div></div>
 <header>
   <h1>SamMPurna <span>MNC Dashboards</span> — Odisha NHM</h1>
-  <div id="lockbadge"><span id="cloudCtl" style="display:none;align-items:center;gap:6px;"><button type="button" onclick="cloudSave()">☁ Save records to cloud</button><button type="button" onclick="cloudLoad()">☁ Load latest</button><span id="cloudStatus"></span></span><span>Viewing: <b id="lockName"></b></span><button type="button" id="logoutBtn" onclick="districtLogout()">Switch / log out</button></div>
+  <div id="lockbadge"><span id="cloudCtl" style="display:none;align-items:center;gap:6px;"><button type="button" onclick="cloudSave()">☁ Save records to cloud</button><button type="button" onclick="cloudLoad()">☁ Load latest</button><span id="cloudStatus"></span></span><span>Viewing: <b id="lockName"></b></span><button type="button" id="logoutBtn" onclick="districtLogout()" title="Log out">⏻ Log out</button></div>
   <div class="switcher" id="main-dashboard-tabs">
   <button id="btn-hbnc" class="active" type="button" onclick="showTab('hbnc')">HBNC / HBYC / PNC</button>
   <button id="btn-anc" type="button" onclick="showTab('anc')">ANC Home Visit</button>
