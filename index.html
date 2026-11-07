@@ -102,9 +102,9 @@
 #gate .err{color:#f87171;font-size:12.5px;min-height:16px;margin-bottom:8px;}
 #lockbadge{display:none;margin-left:auto;align-items:center;gap:8px;font-size:12px;color:#c9a58c;}
 #lockbadge b{color:#fb923c;} #lockbadge button{background:transparent;border:1px solid #2e2015;color:#c9a58c;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;}
-#lockbadge #logoutBtn{background:#dc2626;border:1px solid #ef4444;color:#fff;font-weight:700;font-size:13px;padding:7px 16px;border-radius:8px;letter-spacing:.2px;box-shadow:0 2px 6px rgba(220,38,38,.45);}
-#lockbadge #logoutBtn:hover{background:#b91c1c;border-color:#f87171;}
-#lockbadge #logoutBtn:active{transform:translateY(1px);}
+#logoutBtn{background:#dc2626;border:1px solid #ef4444;color:#fff;font-weight:700;font-size:13px;padding:7px 16px;border-radius:8px;letter-spacing:.2px;box-shadow:0 2px 6px rgba(220,38,38,.45);}
+#logoutBtn:hover{background:#b91c1c;border-color:#f87171;}
+#logoutBtn:active{transform:translateY(1px);}
 </style>
 <style id="mobile-layer">
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
@@ -115,7 +115,9 @@ body{height:100vh;height:100dvh;}
   header h1{font-size:13.5px;flex:1 1 100%;margin-right:0;}
   #lockbadge{margin-left:0;width:100%;flex-wrap:wrap;gap:6px;}
   #lockbadge button{min-height:36px;padding:6px 10px;}
-  #lockbadge #logoutBtn{min-height:42px;padding:8px 18px;font-size:14px;margin-left:auto;}
+  #logoutBtn{min-height:42px;padding:8px 14px;font-size:14px;}
+  #main-dashboard-tabs button{padding:8px 10px;font-size:12.5px;}
+  #main-dashboard-tabs #logoutBtn{flex:0 0 auto;white-space:nowrap;padding:8px 12px;font-size:13px;position:sticky;right:0;}
   #main-dashboard-tabs{width:100%;margin-top:0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:6px;scrollbar-width:none;}
   #main-dashboard-tabs::-webkit-scrollbar{display:none;}
   .switcher button{flex:0 0 auto;white-space:nowrap;padding:10px 14px;min-height:42px;font-size:13px;}
@@ -131,6 +133,11 @@ body{height:100vh;height:100dvh;}
   header{padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:6px;gap:6px;}
   .switcher button{padding:8px 12px;min-height:40px;}
 }
+@media (max-width:380px){
+  #main-dashboard-tabs{gap:5px;}
+  #main-dashboard-tabs button{padding:8px 8px;font-size:12px;}
+  #main-dashboard-tabs #logoutBtn{padding:8px 9px;font-size:12.5px;}
+}
 </style>
 </head>
 <body>
@@ -144,6 +151,20 @@ body{height:100vh;height:100dvh;}
   <button id="btn-anc" type="button" onclick="showTab('anc')">ANC Home Visit</button>
   <button id="btn-training" type="button" onclick="showTab('training')">Training Tracker</button>
 </div>
+<script>
+/* Phone view: show the Log out button in the tab row, right after the ANC Home Visit tab; on wider screens it stays in the top badge. */
+(function(){
+  var mq = window.matchMedia('(max-width:640px)');
+  function place(){
+    var b = document.getElementById('logoutBtn'), tabs = document.getElementById('main-dashboard-tabs'), badge = document.getElementById('lockbadge');
+    if(!b || !tabs || !badge) return;
+    if(mq.matches){ if(b.parentNode !== tabs) tabs.appendChild(b); }
+    else { if(b.parentNode !== badge) badge.appendChild(b); }
+  }
+  place();
+  if(mq.addEventListener) mq.addEventListener('change', place); else if(mq.addListener) mq.addListener(place);
+})();
+</script>
   
 </header>
 <div class="frame-wrap">
