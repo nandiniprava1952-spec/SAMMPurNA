@@ -1553,7 +1553,7 @@ async function cloudLoadModule(key, silent){
     badge.style.display = 'flex';
     if(REC_URL) document.getElementById('cloudCtl').style.display = 'inline-flex';
     document.getElementById('lockName').textContent = DISTRICT_LOCK ? (DISTRICT_LOCK.facilityName ? DISTRICT_LOCK.facilityName + ' facility' : DISTRICT_LOCK.blockName ? DISTRICT_LOCK.name + ' \u203a ' + DISTRICT_LOCK.blockName + ' block' : DISTRICT_LOCK.name + ' district') : 'All districts (State)';
-    document.getElementById('lockName').textContent += '  \u00b7  Rev 113';   // shows which build is running
+    document.getElementById('lockName').textContent += '  \u00b7  Rev 115';   // shows which build is running
     document.getElementById('btn-training').style.display = DISTRICT_LOCK ? 'none' : '';   // Training Tracker: State login only
     cloudPull();
     cloudWarm('hbnc');
@@ -1642,7 +1642,7 @@ async function cloudLoadModule(key, silent){
       DISTRICT_LOCK = null; CLOUD_AUTH = null;
       try{ sessionStorage.removeItem('sm_district_auth'); }catch(x){}
       startDashboards();
-      document.getElementById('lockName').textContent = 'All districts \u00b7 Offline (no cloud)';
+      document.getElementById('lockName').textContent = 'All districts \u00b7 Offline (no cloud)  \u00b7  Rev 115';
       var lb = document.getElementById('logoutBtn'); if(lb) lb.style.display = 'none';
     };
     document.getElementById('gatePass').addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(); });
