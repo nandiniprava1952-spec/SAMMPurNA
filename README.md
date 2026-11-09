@@ -8,6 +8,9 @@ Single-file, offline-capable dashboard for Odisha NHM (Rev 93).
 - Existing beneficiary search under "＋ New Entry" (ANC and HBNC): find earlier visits by name, village or mobile and pre-fill the form. Works offline.
 
 ## What's new in Rev 93
+### Rev 126
+- **Treatment Tracker (State login): records with no treatment data can now be deleted.** Ticked records that have treatment data are cleared as before; ticked records with no treatment data are removed from the Treatment Tracker list (the visit stays in the dashboard). The removal syncs to the cloud and is covered by **Undo delete**. Uploading a tracker file with data for a removed record brings it back.
+
 - **Load latest / cloud load uses much less memory** (State login): when memory use is already high, the data already on screen is released before the cloud data is read in (instead of holding two full copies), and districts are read two at a time. If the load does not finish, a message says the screen data was cleared and to try again.
 
 ### Rev 92
